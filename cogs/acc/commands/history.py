@@ -48,14 +48,6 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
             title=f"Link History of {latest['ign']}",
             color=discord.Color.blurple()
         )
-
-        lines = []
-        for row in rows:
-            ts_unix = int(row["actioned_at"].replace(tzinfo=timezone.utc).timestamp())
-
-            if row["action"] == "claimed":
-                pass
-
         lines = _build_tag_history_lines(rows, interaction.guild)
         embed.description = "\n".join(lines) if lines else "No events recorded."
         embed.set_footer(text=f"{len(rows)} event(s)")
@@ -84,6 +76,7 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
             title=f"Acc Link History of {user.display_name}",
             color=discord.Color.blurple()
         )
+        embed.set_thumbnail(url=user.display_avatar.url)
         lines = _build_user_history_lines(rows)
         embed.description = "\n".join(lines) if lines else "No events recorded."
         embed.set_footer(text=f"{len(rows)} event(s)")
@@ -95,10 +88,6 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
 
 
 def _build_user_history_lines(rows) -> list[str]:
-    """
-    Format per account:
-    TH_EMOJI IGN (`TAG`) — <from> to <to>
-    """
     lines = []
     pending: dict[str, dict] = {}
 
@@ -135,12 +124,8 @@ def _build_user_history_lines(rows) -> list[str]:
 
 
 def _build_tag_history_lines(rows, guild: discord.Guild) -> list[str]:
-    """
-    Format per claim period:
-    <from> to <to> — @username
-    """
     lines = []
-    pending: dict[int, int] = {}  
+    pending: dict[int, int] = {}
 
     for row in rows:
         discord_id = row["discord_id"]
