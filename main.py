@@ -1,11 +1,11 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 import coc
 import asyncio
 import traceback
-import os
 from config import BOT_TOKEN, COC_EMAIL, COC_PASSWORD, TEST_GUILD_ID
-from database.db import init_pool
+from database.db import init_pool, get_pool
 
 intents = discord.Intents.default()
 intents.members = True
@@ -58,10 +58,7 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
     print(f"❌ Slash command error in /{interaction.command.name}:")
     traceback.print_exc()
     try:
-        await interaction.followup.send(
-            f"❌ An error occurred: `{error}`",
-            ephemeral=True
-        )
+        await interaction.followup.send(f"❌ An error occurred: `{error}`")
     except Exception:
         pass
 
@@ -70,7 +67,7 @@ async def main():
     try:
         await init_pool()
         print("✅ Database connected.")
-    except Exception as e:
+    except Exception:
         print(f"❌ Database connection failed:\n{traceback.format_exc()}")
         return
 
@@ -80,7 +77,7 @@ async def main():
         await coc_client.login(COC_EMAIL, COC_PASSWORD)
         bot.coc_client = coc_client
         print("✅ CoC API connected.")
-    except Exception as e:
+    except Exception:
         print(f"❌ CoC API login failed:\n{traceback.format_exc()}")
         return
 
