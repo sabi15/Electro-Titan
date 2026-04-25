@@ -7,8 +7,8 @@ import coc
 
 
 @app_commands.describe(
-    tag="Your Clash of Clans player tag (e.g. #ABC123)",
-    api="Your API token from in-game settings"
+    tag="Your Clash of Clans player tag from your profile (e.g. #ABC123)",
+    api="Your API token from in game settings"
 )
 async def add(interaction: discord.Interaction, tag: str, api: str):
     await interaction.response.defer()
