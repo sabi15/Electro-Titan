@@ -28,6 +28,6 @@ WHITELIST_MESSAGE = (
 )
 
 ACC_INVITE_MESSAGE = (
-    "💡 Want full access to RIKA's features? "
-    "Join our community: https://discord.gg/75UADeZg4K"
+    " Want full access to RIKA's features? "
+    "Join our server to whitelist it : https://discord.gg/75UADeZg4K"
 )
