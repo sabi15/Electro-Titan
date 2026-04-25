@@ -1,0 +1,8 @@
+import os
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_DEV_ID = os.getenv("BOT_DEV")
+TEST_GUILD_ID = 1488389148443283637
+COC_EMAIL = os.getenv("COC_EMAIL")
+COC_PASSWORD = os.getenv("COC_PASSWORD")
+DATABASE_URL = os.getenv("DATABASE_URL")
