@@ -1,4 +1,6 @@
-from discord.ext import commands
+import discord
+from discord import app_commands
+from discord.ext import commands as ext_commands
 from .commands.addperms import addperms
 from .commands.delperms import delperms
 from .commands.clearallperms import clearallperms
@@ -7,12 +9,11 @@ from .commands.blacklist import blacklist
 from .commands.whitelist import whitelist
 from .commands.disablecog import disablecog
 from .commands.enablecog import enablecog
-from .commands.setup import setup
+from .commands.setup import setup as setup_cmd
 from .commands.status import status
-from discord import app_commands
 
 
-class Dev(commands.Cog):
+class Dev(ext_commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -26,7 +27,7 @@ class Dev(commands.Cog):
     dev.command(name="whitelist", description="Whitelist a server")(whitelist)
     dev.command(name="disablecog", description="Disable a cog for a server")(disablecog)
     dev.command(name="enablecog", description="Enable a cog for a server")(enablecog)
-    dev.command(name="setup", description="View server setup info")(setup)
+    dev.command(name="setup", description="View server setup info")(setup_cmd)
     dev.command(name="status", description="View bot status")(status)
 
 
