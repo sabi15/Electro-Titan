@@ -29,5 +29,5 @@ WHITELIST_MESSAGE = (
 
 ACC_INVITE_MESSAGE = (
     "💡 Want full access to RIKA's features? "
-    "Join our community: discord.gg/75UADeZg4K"
+    "Join our community: https://discord.gg/75UADeZg4K"
 )
