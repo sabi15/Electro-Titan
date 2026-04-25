@@ -95,14 +95,6 @@ async def main():
         except Exception:
             print(f"❌ Failed to load cog '{cog}':\n{traceback.format_exc()}")
 
-    try:
-        guild = discord.Object(id=TEST_GUILD_ID)
-        bot.tree.copy_global_to(guild=guild)
-        synced = await bot.tree.sync(guild=guild)
-        print(f"✅ Synced {len(synced)} command(s) to test guild.")
-    except Exception:
-        print(f"❌ Failed to sync commands:\n{traceback.format_exc()}")
-
     print("⏳ Starting bot...")
     try:
         await bot.start(BOT_TOKEN)
