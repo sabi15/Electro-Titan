@@ -284,3 +284,33 @@ CREATE TABLE IF NOT EXISTS disabled_cogs (
     cog_name TEXT NOT NULL,
     UNIQUE(server_id, cog_name)
 );
+
+CREATE TABLE IF NOT EXISTS acc_accounts (
+    id          SERIAL PRIMARY KEY,
+    discord_id  BIGINT NOT NULL,
+    tag         TEXT NOT NULL UNIQUE,
+    ign         TEXT NOT NULL,
+    th_level    INTEGER NOT NULL,
+    claimed_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_acc_accounts_discord ON acc_accounts(discord_id);
+CREATE INDEX IF NOT EXISTS idx_acc_accounts_tag ON acc_accounts(tag);
+
+CREATE TABLE IF NOT EXISTS acc_history (
+    id            SERIAL PRIMARY KEY,
+    discord_id    BIGINT NOT NULL,
+    tag           TEXT NOT NULL,
+    ign           TEXT NOT NULL,
+    th_level      INTEGER NOT NULL,
+    action        TEXT NOT NULL CHECK (action IN ('claimed', 'removed')),
+    actioned_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_acc_history_discord ON acc_history(discord_id);
+CREATE INDEX IF NOT EXISTS idx_acc_history_tag ON acc_history(tag);
+
+CREATE TABLE IF NOT EXISTS acc_usage (
+    discord_id   BIGINT PRIMARY KEY,
+    use_count    INTEGER NOT NULL DEFAULT 0
+);
