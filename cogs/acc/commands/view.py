@@ -46,9 +46,12 @@ async def view(interaction: discord.Interaction, tag: str = None, user: discord.
             member = interaction.guild.get_member(row["discord_id"]) or await interaction.guild.fetch_member(row["discord_id"])
             owner_display = member.mention
         except Exception:
+            member = None
             owner_display = f"<@{row['discord_id']}>"
 
         embed = discord.Embed(title="Account Lookup", color=discord.Color.blurple())
+        if member:
+            embed.set_thumbnail(url=member.display_avatar.url)
         embed.add_field(
             name="Account",
             value=f"{th_emoji} **{row['ign']}** (`{tag}`)",
@@ -81,6 +84,7 @@ async def view(interaction: discord.Interaction, tag: str = None, user: discord.
             title=f"Linked Accounts — {user.display_name}",
             color=discord.Color.blurple()
         )
+        embed.set_thumbnail(url=user.display_avatar.url)
         lines = []
         for row in rows:
             th_emoji = get_th_emoji(row["th_level"])
