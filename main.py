@@ -37,6 +37,9 @@ async def on_ready():
     try:
         guild = discord.Object(id=TEST_GUILD_ID)
         bot.tree.copy_global_to(guild=guild)
+        # Clear old commands first
+        bot.tree.clear_commands(guild=guild)
+        bot.tree.clear_commands(guild=None)
         synced = await bot.tree.sync(guild=guild)
         print(f"✅ Synced {len(synced)} command(s) to test guild.")
     except Exception:
