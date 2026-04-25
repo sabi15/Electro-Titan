@@ -43,11 +43,20 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
 
         latest = rows[-1]
         th_emoji = get_th_emoji(latest["th_level"])
+
         embed = discord.Embed(
-            title=f"Account History — {th_emoji} {latest['ign']} ({tag})",
+            title=f"Link History of {latest['ign']}",
             color=discord.Color.blurple()
         )
-        lines = _build_history_lines(rows, by="tag")
+
+        lines = []
+        for row in rows:
+            ts_unix = int(row["actioned_at"].replace(tzinfo=timezone.utc).timestamp())
+
+            if row["action"] == "claimed":
+                pass
+
+        lines = _build_tag_history_lines(rows, interaction.guild)
         embed.description = "\n".join(lines) if lines else "No events recorded."
         embed.set_footer(text=f"{len(rows)} event(s)")
         await interaction.followup.send(embed=embed)
@@ -72,10 +81,10 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
             return
 
         embed = discord.Embed(
-            title=f"Account History — {user.display_name}",
+            title=f"Acc Link History of {user.display_name}",
             color=discord.Color.blurple()
         )
-        lines = _build_history_lines(rows, by="user")
+        lines = _build_user_history_lines(rows)
         embed.description = "\n".join(lines) if lines else "No events recorded."
         embed.set_footer(text=f"{len(rows)} event(s)")
         await interaction.followup.send(embed=embed)
@@ -85,7 +94,11 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
         await interaction.followup.send(invite)
 
 
-def _build_history_lines(rows, by: str) -> list[str]:
+def _build_user_history_lines(rows) -> list[str]:
+    """
+    Format per account:
+    TH_EMOJI IGN (`TAG`) — <from> to <to>
+    """
     lines = []
     pending: dict[str, dict] = {}
 
@@ -96,18 +109,65 @@ def _build_history_lines(rows, by: str) -> list[str]:
         ts_unix = int(row["actioned_at"].replace(tzinfo=timezone.utc).timestamp())
 
         if row["action"] == "claimed":
-            pending[key] = {"ts_unix": ts_unix, "th_emoji": th_emoji, "ign": ign, "tag": row["tag"]}
+            pending[key] = {
+                "ts_unix": ts_unix,
+                "th_emoji": th_emoji,
+                "ign": ign,
+                "tag": row["tag"]
+            }
         elif row["action"] == "removed":
             if key in pending:
                 start_unix = pending.pop(key)["ts_unix"]
-                entry_tag = f" (`{row['tag']}`)" if by == "user" else ""
-                lines.append(f"{th_emoji} **{ign}**{entry_tag} — <t:{start_unix}:D> to <t:{ts_unix}:D>")
+                lines.append(
+                    f"{th_emoji} **{ign}** (`{row['tag']}`) — <t:{start_unix}:D> to <t:{ts_unix}:D>"
+                )
             else:
-                entry_tag = f" (`{row['tag']}`)" if by == "user" else ""
-                lines.append(f"{th_emoji} **{ign}**{entry_tag} — *(unknown start)* to <t:{ts_unix}:D>")
+                lines.append(
+                    f"{th_emoji} **{ign}** (`{row['tag']}`) — *(unknown start)* to <t:{ts_unix}:D>"
+                )
 
     for key, data in pending.items():
-        entry_tag = f" (`{data['tag']}`)" if by == "user" else ""
-        lines.append(f"{data['th_emoji']} **{data['ign']}**{entry_tag} — <t:{data['ts_unix']}:D> to **present**")
+        lines.append(
+            f"{data['th_emoji']} **{data['ign']}** (`{data['tag']}`) — <t:{data['ts_unix']}:D> to **present**"
+        )
+
+    return lines
+
+
+def _build_tag_history_lines(rows, guild: discord.Guild) -> list[str]:
+    """
+    Format per claim period:
+    <from> to <to> — @username
+    """
+    lines = []
+    pending: dict[int, int] = {}  
+
+    for row in rows:
+        discord_id = row["discord_id"]
+        ts_unix = int(row["actioned_at"].replace(tzinfo=timezone.utc).timestamp())
+
+        if row["action"] == "claimed":
+            pending[discord_id] = ts_unix
+        elif row["action"] == "removed":
+            if discord_id in pending:
+                start_unix = pending.pop(discord_id)
+                member = guild.get_member(discord_id)
+                user_display = member.mention if member else f"<@{discord_id}>"
+                lines.append(
+                    f"<t:{start_unix}:D> to <t:{ts_unix}:D> — {user_display}"
+                )
+            else:
+                member = guild.get_member(discord_id)
+                user_display = member.mention if member else f"<@{discord_id}>"
+                lines.append(
+                    f"*(unknown start)* to <t:{ts_unix}:D> — {user_display}"
+                )
+
+    for discord_id, start_unix in pending.items():
+        member = guild.get_member(discord_id)
+        user_display = member.mention if member else f"<@{discord_id}>"
+        lines.append(
+            f"<t:{start_unix}:D> to **present** — {user_display}"
+        )
 
     return lines
