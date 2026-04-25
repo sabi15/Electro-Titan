@@ -16,19 +16,24 @@ from .commands.status import status
 class Dev(ext_commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.dev = app_commands.Group(
+            name="dev",
+            description="Bot developer commands"
+        )
+        self.dev.command(name="addperms", description="Add a permission to a role")(addperms)
+        self.dev.command(name="delperms", description="Remove a permission from a role")(delperms)
+        self.dev.command(name="clearallperms", description="Clear all perms in this server")(clearallperms)
+        self.dev.command(name="permlist", description="List all perm assignments in this server")(permlist)
+        self.dev.command(name="blacklist", description="Blacklist a server")(blacklist)
+        self.dev.command(name="whitelist", description="Whitelist a server")(whitelist)
+        self.dev.command(name="disablecog", description="Disable a cog for a server")(disablecog)
+        self.dev.command(name="enablecog", description="Enable a cog for a server")(enablecog)
+        self.dev.command(name="setup", description="View server setup info")(setup_cmd)
+        self.dev.command(name="status", description="View bot status")(status)
+        bot.tree.add_command(self.dev)
 
-    dev = app_commands.Group(name="dev", description="Bot developer commands")
-
-    dev.command(name="addperms", description="Add a permission to a role")(addperms)
-    dev.command(name="delperms", description="Remove a permission from a role")(delperms)
-    dev.command(name="clearallperms", description="Clear all perms in this server")(clearallperms)
-    dev.command(name="permlist", description="List all perm assignments in this server")(permlist)
-    dev.command(name="blacklist", description="Blacklist a server")(blacklist)
-    dev.command(name="whitelist", description="Whitelist a server")(whitelist)
-    dev.command(name="disablecog", description="Disable a cog for a server")(disablecog)
-    dev.command(name="enablecog", description="Enable a cog for a server")(enablecog)
-    dev.command(name="setup", description="View server setup info")(setup_cmd)
-    dev.command(name="status", description="View bot status")(status)
+    async def cog_unload(self):
+        self.bot.tree.remove_command("dev")
 
 
 async def setup(bot):
