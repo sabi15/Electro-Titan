@@ -34,6 +34,13 @@ COGS = [
 async def on_ready():
     print(f"✅ Logged in as {bot.user} (ID: {bot.user.id})")
     print(f"✅ Connected to {len(bot.guilds)} guild(s)")
+    try:
+        guild = discord.Object(id=TEST_GUILD_ID)
+        bot.tree.copy_global_to(guild=guild)
+        synced = await bot.tree.sync(guild=guild)
+        print(f"✅ Synced {len(synced)} command(s) to test guild.")
+    except Exception:
+        print(f"❌ Failed to sync commands:\n{traceback.format_exc()}")
 
 @bot.event
 async def on_error(event, *args, **kwargs):
