@@ -2,10 +2,17 @@ from database.db import get_pool
 from config import ACC_INVITE_MESSAGE
 
 
-async def maybe_send_invite(discord_id: int) -> str | None:
+async def maybe_send_invite(discord_id: int, guild_id: int) -> str | None:
     pool = await get_pool()
 
     row = await pool.fetchrow(
+        "SELECT whitelisted FROM whitelisted_servers WHERE server_id = $1",
+        str(guild_id)
+    )
+    if row and row["whitelisted"]:
+        return None
+
+    usage_row = await pool.fetchrow(
         """
         INSERT INTO acc_usage (discord_id, use_count)
         VALUES ($1, 1)
@@ -16,6 +23,6 @@ async def maybe_send_invite(discord_id: int) -> str | None:
         discord_id
     )
 
-    if row["use_count"] % 3 == 0:
+    if usage_row["use_count"] % 3 == 0:
         return ACC_INVITE_MESSAGE
     return None
