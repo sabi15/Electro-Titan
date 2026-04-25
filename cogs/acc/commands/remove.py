@@ -56,6 +56,6 @@ async def remove(interaction: discord.Interaction, tag: str):
     embed.set_footer(text=f"Removed by {interaction.user.display_name}")
     await interaction.followup.send(embed=embed)
 
-    invite = await maybe_send_invite(interaction.user.id)
+    invite = await maybe_send_invite(interaction.user.id, interaction.guild_id)
     if invite:
         await interaction.followup.send(invite)
