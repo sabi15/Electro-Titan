@@ -40,6 +40,19 @@ async def on_error(event, *args, **kwargs):
     print(f"❌ Error in event '{event}':")
     traceback.print_exc()
 
+@bot.event
+async def on_guild_join(guild):
+    pool = await get_pool()
+    row = await pool.fetchrow(
+        "SELECT whitelisted FROM whitelisted_servers WHERE server_id=$1",
+        str(guild.id)
+    )
+    if row and not row["whitelisted"]:
+        try:
+            await guild.leave()
+        except Exception:
+            pass
+
 @bot.tree.error
 async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
     print(f"❌ Slash command error in /{interaction.command.name}:")
