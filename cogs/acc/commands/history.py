@@ -82,7 +82,7 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
         embed.set_footer(text=f"{len(rows)} event(s)")
         await interaction.followup.send(embed=embed)
 
-    invite = await maybe_send_invite(interaction.user.id)
+    invite = await maybe_send_invite(interaction.user.id, interaction.guild_id)
     if invite:
         await interaction.followup.send(invite)
 
