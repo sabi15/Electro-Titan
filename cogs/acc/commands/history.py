@@ -25,7 +25,7 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
 
         rows = await pool.fetch(
             """
-            SELECT discord_id, ign, th_level, action, actioned_at
+            SELECT discord_id, tag, ign, th_level, action, actioned_at
             FROM acc_history
             WHERE tag = $1
             ORDER BY actioned_at ASC
