@@ -1,6 +1,6 @@
 import discord
 from discord import ui
-from db import get_pool
+from database.db import get_pool
 from cogs.league.utils import check_league_admin, get_league
 
 
