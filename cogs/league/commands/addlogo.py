@@ -1,6 +1,6 @@
 import discord
 from cogs.league.utils import check_league_admin, get_league
-from db import get_pool
+from database.db import get_pool
 
 
 async def league_addlogo(interaction: discord.Interaction, code: str, attachment: discord.Attachment):
