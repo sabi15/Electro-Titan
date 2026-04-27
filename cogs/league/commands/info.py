@@ -1,5 +1,5 @@
 import discord
-from db import get_pool
+from database.db import get_pool
 from cogs.league.utils import get_league
 
 
