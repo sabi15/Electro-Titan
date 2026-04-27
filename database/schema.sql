@@ -17,13 +17,19 @@ CREATE TABLE IF NOT EXISTS claims (
 );
 
 -- Leagues
-CREATE TABLE IF NOT EXISTS leagues (
-    id SERIAL PRIMARY KEY,
-    guild_id TEXT NOT NULL,
-    display_name TEXT NOT NULL,
-    code TEXT NOT NULL,
-    UNIQUE(guild_id, code)
+CREATE TABLE leagues (
+    id           SERIAL PRIMARY KEY,
+    guild_id     BIGINT NOT NULL,
+    name         TEXT NOT NULL,
+    code         TEXT NOT NULL,
+    description  TEXT,
+    logo_url     TEXT,
+    invite_link  TEXT,
+    ban_duration INTEGER,
+    created_at   TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (guild_id, code)
 );
+
 
 -- Divisions
 CREATE TABLE IF NOT EXISTS divisions (
