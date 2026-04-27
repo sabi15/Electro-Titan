@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext import commands as ext_commands
 from discord import app_commands
 from cogs.league.commands.create import league_create
 from cogs.league.commands.delete import league_delete
@@ -8,7 +8,7 @@ from cogs.league.commands.list import league_list
 from cogs.league.commands.info import league_info
 
 
-class league(ext_commands.Cog):
+class League(ext_commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.group = app_commands.Group(name="league", description="League management commands")
