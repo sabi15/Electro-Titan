@@ -1,4 +1,4 @@
-from db import get_pool
+from database.db import get_pool
 
 
 async def get_league(guild_id: int, code: str):
