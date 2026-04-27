@@ -37,4 +37,4 @@ class League(ext_commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(league(bot))
+    await bot.add_cog(League(bot))
