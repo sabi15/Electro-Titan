@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS claims (
 );
 
 -- Leagues
-CREATE TABLE leagues (
+CREATE TABLE IF NOT EXISTS leagues (
     id           SERIAL PRIMARY KEY,
     guild_id     BIGINT NOT NULL,
     name         TEXT NOT NULL,
