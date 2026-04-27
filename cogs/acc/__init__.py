@@ -13,10 +13,10 @@ class acc(ext_commands.Cog):
             name="acc",
             description="public commands"
         )
-        self.acc.command(name="add", description="Add a permission to a role")(add)
-        self.acc.command(name="view", description="Remove a permission from a role")(view)
-        self.acc.command(name="history", description="Clear all perms in this server")(history)
-        self.acc.command(name="remove", description="List all perm assignments in this server")(remove)
+        self.acc.command(name="add", description="link your coc account with discord")(add)
+        self.acc.command(name="view", description="check all the connected accounts")(view)
+        self.acc.command(name="history", description="check link history")(history)
+        self.acc.command(name="remove", description="unlink a coc account from your discord")(remove)
         bot.tree.add_command(self.acc)
 
     async def cog_unload(self):
