@@ -13,12 +13,19 @@ async def check_league_admin(interaction):
     from config import BOT_DEV_ID
     if interaction.user.id == BOT_DEV_ID:
         return True
+
     pool = await get_pool()
+    role_ids = [str(role.id) for role in interaction.user.roles]
+    if not role_ids:
+        return False
+
     row = await pool.fetchrow(
         """
         SELECT 1 FROM perm_assignments
-        WHERE guild_id = $1 AND discord_id = $2 AND permission = 'LEAGUE_ADMIN'
+        WHERE guild_id = $1
+        AND role_id = ANY($2::text[])
+        AND permission = 'LEAGUE_ADMIN'
         """,
-        interaction.guild_id, interaction.user.id
+        str(interaction.guild_id), role_ids
     )
     return row is not None
