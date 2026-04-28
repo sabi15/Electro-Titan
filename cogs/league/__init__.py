@@ -6,6 +6,8 @@ from cogs.league.commands.setup import league_setup
 from cogs.league.commands.addlogo import league_addlogo
 from cogs.league.commands.list import league_list
 from cogs.league.commands.info import league_info
+from cogs.league.commands.showsetup import league_showsetup
+
 
 
 class League(ext_commands.Cog):
@@ -29,6 +31,10 @@ class League(ext_commands.Cog):
         self.group.command(name="info", description="View league details")(
             app_commands.describe(code="League code")(league_info)
         )
+        self.group.command(name="showsetup", description="View current setup values for a league")(
+            app_commands.describe(code="League code")(league_showsetup)
+        )
+
 
         bot.tree.add_command(self.group)
 
