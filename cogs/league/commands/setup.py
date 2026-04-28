@@ -1,5 +1,6 @@
 import discord
 from discord import ui
+import re
 from database.db import get_pool
 from cogs.league.utils import check_league_admin, get_league
 
@@ -17,6 +18,10 @@ SETUP_OPTIONS = [
     discord.SelectOption(label="Ban Duration (days)", value="ban_duration", emoji="⏱️"),
     discord.SelectOption(label="Code", value="code", emoji="🏷️"),
 ]
+
+DISCORD_INVITE_REGEX = re.compile(
+    r"^(https?://)?(discord\.gg|discord\.com/invite)/[a-zA-Z0-9-]+$"
+)
 
 
 def build_embed(league_name: str) -> discord.Embed:
@@ -38,9 +43,9 @@ class SetupModal(ui.Modal, title="League Setup"):
 
         placeholders = {
             "description": "Enter league description",
-            "invite_link": "Enter Discord invite URL",
+            "invite_link": "Enter Discord invite URL (e.g. discord.gg/abc123)",
             "ban_duration": "Enter number of days (e.g. 30)",
-            "code": "Enter new league code (e.g. GBS-OL)",
+            "code": "Enter new league code — max 4 characters (e.g. GBS)",
         }
 
         for field in selected_fields:
@@ -58,19 +63,40 @@ class SetupModal(ui.Modal, title="League Setup"):
         pool = await get_pool()
 
         updates = {}
+        errors = []
+
         for field, text_input in self.field_inputs.items():
             value = text_input.value.strip()
+
             if field == "ban_duration":
                 if not value.isdigit():
-                    await interaction.response.send_message(
-                        "Ban duration must be a whole number."
-                    )
-                    return
+                    errors.append("❌ **Ban Duration** must be a whole number.")
+                    continue
                 updates[field] = int(value)
+
             elif field == "code":
-                updates[field] = value.upper()
+                value = value.upper()
+                if len(value) > 4:
+                    errors.append("❌ **Code** must be 4 characters or less (e.g. `GBS`).")
+                    continue
+                updates[field] = value
+
+            elif field == "invite_link":
+                if not DISCORD_INVITE_REGEX.match(value):
+                    errors.append("❌ **Server Invite Link** is not a valid Discord invite (e.g. `discord.gg/abc123`).")
+                    continue
+                updates[field] = value
+
             else:
                 updates[field] = value
+
+        if errors:
+            await interaction.response.send_message("\n".join(errors))
+            return
+
+        if not updates:
+            await interaction.response.send_message("No valid fields to update.")
+            return
 
         set_clauses = ", ".join(
             f"{col} = ${i + 3}" for i, col in enumerate(updates.keys())
@@ -86,8 +112,20 @@ class SetupModal(ui.Modal, title="League Setup"):
         if "code" in updates:
             self.setup_view.league_code = updates["code"]
 
+        # Build confirmation message
+        label_map = {
+            "description": "Description",
+            "invite_link": "Server Invite Link",
+            "ban_duration": "Ban Duration",
+            "code": "Code",
+        }
+        changes = "\n".join(
+            f"✅ **{label_map[f]}** updated to `{v}`" for f, v in updates.items()
+        )
+
         new_embed = build_embed(self.setup_view.league_name)
         await interaction.response.edit_message(embed=new_embed, view=self.setup_view)
+        await interaction.followup.send(changes)
 
 
 class SetupDropdown(ui.Select):
@@ -125,14 +163,6 @@ class SetupView(ui.View):
 
     async def on_timeout(self):
         await self.disable_all()
-
-    @ui.button(label="Save & Close", style=discord.ButtonStyle.green, row=1)
-    async def save_button(self, interaction: discord.Interaction, button: ui.Button):
-        await self.disable_all()
-        await interaction.response.edit_message(
-            content="✅ Setup saved and closed.",
-            view=self
-        )
 
     @ui.button(label="Cancel", style=discord.ButtonStyle.red, row=1)
     async def cancel_button(self, interaction: discord.Interaction, button: ui.Button):
