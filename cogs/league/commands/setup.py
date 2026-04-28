@@ -19,32 +19,13 @@ SETUP_OPTIONS = [
 ]
 
 
-def build_embed(league_name: str, current: dict) -> discord.Embed:
+def build_embed(league_name: str) -> discord.Embed:
     embed = discord.Embed(
         title=f"League Setup — {league_name}",
+        description="```\n1. Description\n2. Server Invite Link\n3. Code\n4. Ban Duration\n```",
         color=discord.Color.blurple()
     )
-    embed.add_field(
-        name="📝 Description",
-        value=current.get("description") or "*Not set*",
-        inline=False
-    )
-    embed.add_field(
-        name="🔗 Server Invite Link",
-        value=current.get("invite_link") or "*Not set*",
-        inline=False
-    )
-    embed.add_field(
-        name="🏷️ Code",
-        value=f"`{current.get('code')}`" if current.get("code") else "*Not set*",
-        inline=False
-    )
-    embed.add_field(
-        name="⏱️ Ban Duration",
-        value=f"{current.get('ban_duration')} days" if current.get("ban_duration") else "*Not set*",
-        inline=False
-    )
-    embed.set_footer(text="Select the fields you want to modify from the dropdown below.")
+    embed.set_footer(text="Use the dropdown below to select the fields you'd like to configure.")
     return embed
 
 
@@ -82,7 +63,7 @@ class SetupModal(ui.Modal, title="League Setup"):
             if field == "ban_duration":
                 if not value.isdigit():
                     await interaction.response.send_message(
-                        "Ban duration must be a whole number.", ephemeral=False
+                        "Ban duration must be a whole number."
                     )
                     return
                 updates[field] = int(value)
@@ -101,12 +82,11 @@ class SetupModal(ui.Modal, title="League Setup"):
             self.setup_view.guild_id, self.setup_view.league_code, *values
         )
 
-        # Update local current state so next modal open shows new values
         self.setup_view.current.update(updates)
         if "code" in updates:
             self.setup_view.league_code = updates["code"]
 
-        new_embed = build_embed(self.setup_view.league_name, self.setup_view.current)
+        new_embed = build_embed(self.setup_view.league_name)
         await interaction.response.edit_message(embed=new_embed, view=self.setup_view)
 
 
@@ -176,7 +156,7 @@ async def league_setup(interaction: discord.Interaction, code: str):
         return
 
     current = dict(league)
-    embed = build_embed(league['name'], current)
+    embed = build_embed(league['name'])
     view = SetupView(interaction.guild_id, code, league['name'], current)
 
     await interaction.response.send_message(embed=embed, view=view)
