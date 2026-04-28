@@ -11,6 +11,8 @@ from .commands.disablecog import disablecog
 from .commands.enablecog import enablecog
 from .commands.setup import setup as setup_cmd
 from .commands.status import status
+from .commands.migrate import dev_migrate
+
 
 
 class Dev(ext_commands.Cog):
@@ -30,6 +32,7 @@ class Dev(ext_commands.Cog):
         self.dev.command(name="enablecog", description="Enable a cog for a server")(enablecog)
         self.dev.command(name="setup", description="View server setup info")(setup_cmd)
         self.dev.command(name="status", description="View bot status")(status)
+        self.dev.command(name="migrate", description="Run DB migration")(dev_migrate)
         bot.tree.add_command(self.dev)
 
     async def cog_unload(self):
