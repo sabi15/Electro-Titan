@@ -13,7 +13,7 @@ async def league_info(interaction: discord.Interaction, code: str):
     pool = await get_pool()
     division_count = await pool.fetchval(
         "SELECT COUNT(*) FROM divisions WHERE league_code = $1 AND guild_id = $2",
-        code, interaction.guild_id
+        code, str(interaction.guild_id)
     ) or 0
 
     embed = discord.Embed(
@@ -30,5 +30,5 @@ async def league_info(interaction: discord.Interaction, code: str):
     if league['logo_url']:
         embed.set_thumbnail(url=league['logo_url'])
 
-    embed.set_footer(text=f"League created in this server")
+    embed.set_footer(text="League created in this server")
     await interaction.response.send_message(embed=embed)
