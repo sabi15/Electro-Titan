@@ -19,11 +19,13 @@ async def check_division_admin(interaction):
     )
     return row is not None
 
+
 async def get_division_by_code(pool, guild_id: str, code: str):
     return await pool.fetchrow(
         "SELECT * FROM divisions WHERE guild_id = $1 AND code = $2",
         guild_id, code.upper()
     )
+
 
 async def get_division_settings(pool, division_id: int):
     rows = await pool.fetch(
@@ -31,6 +33,7 @@ async def get_division_settings(pool, division_id: int):
         division_id
     )
     return {row["key"]: row["value"] for row in rows}
+
 
 async def upsert_setting(pool, division_id: int, key: str, value: str):
     await pool.execute(
@@ -41,6 +44,7 @@ async def upsert_setting(pool, division_id: int, key: str, value: str):
         """,
         division_id, key, value
     )
+
 
 SETTINGS_PAGES = [
     [
