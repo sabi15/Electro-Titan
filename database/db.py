@@ -14,9 +14,8 @@ async def create_tables():
     with open(schema_path, "r") as f:
         schema = f.read()
     async with _pool.acquire() as conn:
-        await conn.execute("DROP SCHEMA public CASCADE;")
-        await conn.execute("CREATE SCHEMA public;")
         await conn.execute(schema)
+
 
 
 async def get_pool():
