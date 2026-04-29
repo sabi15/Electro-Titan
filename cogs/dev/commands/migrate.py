@@ -4,7 +4,7 @@ from database.db import get_pool
 from config import BOT_DEV_ID
 
 
-async def dev_migrate_divisions(interaction: discord.Interaction):
+async def dev_migrate(interaction: discord.Interaction):
     if interaction.user.id != BOT_DEV_ID:
         await interaction.response.send_message("No permission.")
         return
