@@ -67,3 +67,62 @@ CREATE TABLE IF NOT EXISTS leagues (
     created_at   TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE (guild_id, code)
 );
+
+CREATE TABLE IF NOT EXISTS divisions (
+    id SERIAL PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    league_code TEXT NOT NULL,
+    name TEXT NOT NULL,
+    code TEXT NOT NULL,
+    season TEXT NOT NULL DEFAULT '1',
+    logo_url TEXT,
+    transaction_log_channel_id TEXT,
+    rep_role_id TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    UNIQUE(guild_id, code)
+);
+
+CREATE TABLE IF NOT EXISTS division_settings (
+    id SERIAL PRIMARY KEY,
+    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
+    key TEXT NOT NULL,
+    value TEXT,
+    UNIQUE(division_id, key)
+);
+
+CREATE TABLE IF NOT EXISTS division_schedules (
+    id SERIAL PRIMARY KEY,
+    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    UNIQUE(division_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS division_groups (
+    id SERIAL PRIMARY KEY,
+    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
+    schedule_name TEXT NOT NULL,
+    group_name TEXT NOT NULL,
+    team_codes TEXT[] NOT NULL DEFAULT '{}',
+    UNIQUE(division_id, schedule_name, group_name)
+);
+
+CREATE TABLE IF NOT EXISTS division_participants (
+    id SERIAL PRIMARY KEY,
+    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
+    team_code TEXT NOT NULL,
+    season TEXT NOT NULL,
+    timezone TEXT,
+    UNIQUE(division_id, team_code, season)
+);
+
+CREATE TABLE IF NOT EXISTS division_season_archive (
+    id SERIAL PRIMARY KEY,
+    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
+    season TEXT NOT NULL,
+    archived_at TIMESTAMPTZ DEFAULT NOW(),
+    settings_snapshot JSONB,
+    groups_snapshot JSONB
+);
+
