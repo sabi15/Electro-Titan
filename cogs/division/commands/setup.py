@@ -6,7 +6,6 @@ from cogs.division.utils import (
     get_division_settings, upsert_setting, SETTINGS_PAGES
 )
 
-# Flatten all settings into a single list with page labels
 PAGE_LABELS = ["Page 1", "Page 2", "Page 3"]
 
 
