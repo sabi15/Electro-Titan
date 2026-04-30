@@ -14,6 +14,9 @@ from .commands.info import division_info
 from .commands.setlogo import division_setlogo
 from .commands.newseason import division_newseason
 from .commands.participants import division_participants
+from .commands.list import division_list
+from .commands.showsetup import division_showsetup
+
 
 
 class Division(ext_commands.Cog):
@@ -35,6 +38,8 @@ class Division(ext_commands.Cog):
         self.division.command(name="setlogo", description="Set the logo for a division")(division_setlogo)
         self.division.command(name="newseason", description="Archive current season and start fresh")(division_newseason)
         self.division.command(name="participants", description="View all participants in a division")(division_participants)
+        self.division.command(name="list", description="List all active divisions in this server")(division_list)
+        self.division.command(name="showsetup", description="View all configured settings for a division")(division_showsetup)
         bot.tree.add_command(self.division)
 
     async def cog_unload(self):
