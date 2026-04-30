@@ -13,13 +13,11 @@ def build_embed(division_name: str, settings: dict, page: int) -> discord.Embed:
         title=f"Division Setup — {division_name}",
         color=discord.Color.blurple()
     )
-    lines = []
-    for i, key in enumerate(SETTINGS_PAGES[page], start=1):
-        current = settings.get(key) or SETTING_DEFAULTS.get(key, "_not set_")
-        lines.append(f"`{key}` — {current}")
+    lines = [f"`{key}`" for key in SETTINGS_PAGES[page]]
     embed.description = "\n".join(lines)
     embed.set_footer(text=f"Page {page + 1} of {len(SETTINGS_PAGES)} — Select a setting to configure it.")
     return embed
+
 
 
 class SettingModal(ui.Modal):
