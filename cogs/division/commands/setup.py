@@ -3,17 +3,9 @@ from discord import ui
 from database.db import get_pool
 from cogs.division.utils import (
     check_division_admin, get_division_by_code,
-    get_division_settings, upsert_setting, SETTINGS_PAGES
+    get_division_settings, upsert_setting,
+    SETTINGS_PAGES, SETTING_DEFAULTS, validate_setting
 )
-
-PAGE_LABELS = ["Page 1", "Page 2", "Page 3"]
-
-
-def build_options_for_page(page: int) -> list[discord.SelectOption]:
-    return [
-        discord.SelectOption(label=key, value=key)
-        for key in SETTINGS_PAGES[page]
-    ]
 
 
 def build_embed(division_name: str, settings: dict, page: int) -> discord.Embed:
@@ -22,12 +14,10 @@ def build_embed(division_name: str, settings: dict, page: int) -> discord.Embed:
         color=discord.Color.blurple()
     )
     lines = []
-    for key in SETTINGS_PAGES[page]:
-        val = settings.get(key) or "_not set_"
-        lines.append(f"`{key}`: {val}")
-    embed.description = "```\n" + "\n".join(
-        f"{i+1}. {key}" for i, key in enumerate(SETTINGS_PAGES[page])
-    ) + "\n```"
+    for i, key in enumerate(SETTINGS_PAGES[page], start=1):
+        current = settings.get(key) or SETTING_DEFAULTS.get(key, "_not set_")
+        lines.append(f"`{key}` — {current}")
+    embed.description = "\n".join(lines)
     embed.set_footer(text=f"Page {page + 1} of {len(SETTINGS_PAGES)} — Select a setting to configure it.")
     return embed
 
@@ -40,43 +30,71 @@ class SettingModal(ui.Modal):
         self.view_ref = view
         self.field_inputs = {}
 
-        for key in keys:
+        for key in keys[:5]:  # Discord modal max 5 inputs
+            default = current.get(key) or SETTING_DEFAULTS.get(key, "")
             text_input = ui.TextInput(
                 label=key,
-                default=str(current.get(key) or ""),
+                default=str(default),
                 required=False,
-                max_length=500
+                max_length=1000
             )
             self.field_inputs[key] = text_input
             self.add_item(text_input)
 
     async def on_submit(self, interaction: discord.Interaction):
         pool = await get_pool()
+        errors = []
         updates = {}
 
         for key, text_input in self.field_inputs.items():
             value = text_input.value.strip()
+            if not value:
+                continue
+            error = validate_setting(key, value)
+            if error:
+                errors.append(error)
+            else:
+                updates[key] = value
+
+        if errors:
+            error_embed = discord.Embed(
+                title="Setup Errors",
+                description="\n\n".join(errors),
+                color=discord.Color.red()
+            )
+            await interaction.response.defer()
+            await interaction.followup.send(embed=error_embed)
+            return
+
+        for key, value in updates.items():
             await upsert_setting(pool, self.division_id, key, value)
-            updates[key] = value
+            self.view_ref.settings[key] = value
 
-        self.view_ref.settings.update(updates)
-
-        changes = "\n".join(f"✅ **{k}** updated to `{v}`" for k, v in updates.items() if v)
-
-        new_embed = build_embed(self.view_ref.division_name, self.view_ref.settings, self.view_ref.page)
-        await interaction.response.edit_message(embed=new_embed, view=self.view_ref)
-        if changes:
-            await interaction.followup.send(changes)
+        if updates:
+            changes_embed = discord.Embed(
+                title="Settings Updated",
+                description="\n".join(f"✅ **{k}** → `{v}`" for k, v in updates.items()),
+                color=discord.Color.green()
+            )
+            new_embed = build_embed(self.view_ref.division_name, self.view_ref.settings, self.view_ref.page)
+            await interaction.response.edit_message(embed=new_embed, view=self.view_ref)
+            await interaction.followup.send(embed=changes_embed)
+        else:
+            await interaction.response.defer()
 
 
 class SetupDropdown(ui.Select):
     def __init__(self, view: "SetupView"):
         self.setup_view = view
+        options = [
+            discord.SelectOption(label=key, value=key)
+            for key in SETTINGS_PAGES[view.page]
+        ]
         super().__init__(
             placeholder="Select settings to configure...",
             min_values=1,
             max_values=min(5, len(SETTINGS_PAGES[view.page])),
-            options=build_options_for_page(view.page)
+            options=options
         )
 
     async def callback(self, interaction: discord.Interaction):
@@ -134,7 +152,11 @@ class SetupView(ui.View):
 
         async def cancel_cb(interaction: discord.Interaction):
             await self.disable_all()
-            await interaction.response.edit_message(content="❌ Setup cancelled.", embed=None, view=self)
+            await interaction.response.edit_message(
+                content="❌ Setup cancelled.",
+                embed=None,
+                view=self
+            )
 
         first.callback = first_cb
         prev.callback = prev_cb
@@ -160,7 +182,9 @@ class SetupView(ui.View):
 
 async def division_setup(interaction: discord.Interaction, division: str):
     if not await check_division_admin(interaction):
-        await interaction.response.send_message("You don't have permission to do this.")
+        await interaction.response.send_message(
+            embed=discord.Embed(description="You don't have permission to do this.", color=discord.Color.red())
+        )
         return
 
     guild_id = str(interaction.guild_id)
@@ -168,7 +192,9 @@ async def division_setup(interaction: discord.Interaction, division: str):
 
     div = await get_division_by_code(pool, guild_id, division)
     if not div:
-        await interaction.response.send_message(f"No division found with code `{division.upper()}`.")
+        await interaction.response.send_message(
+            embed=discord.Embed(description=f"No division found with code `{division.upper()}`.", color=discord.Color.red())
+        )
         return
 
     settings = await get_division_settings(pool, div["id"])
