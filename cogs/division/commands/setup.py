@@ -19,21 +19,21 @@ def build_embed(division_name: str, settings: dict, page: int) -> discord.Embed:
     return embed
 
 
-
 class SettingModal(ui.Modal):
     def __init__(self, keys: list[str], current: dict, division_id: int, division_name: str, view: "SetupView"):
         super().__init__(title="Division Setup")
-        self.keys = keys
+        self.keys = keys[:5]
         self.division_id = division_id
         self.view_ref = view
         self.field_inputs = {}
 
-        for key in keys[:5]:  # Discord modal max 5 inputs
+        for key in self.keys:
             default = current.get(key) or SETTING_DEFAULTS.get(key, "")
             text_input = ui.TextInput(
                 label=key,
                 default=str(default),
                 required=False,
+                style=discord.TextStyle.paragraph,
                 max_length=1000
             )
             self.field_inputs[key] = text_input
@@ -91,12 +91,12 @@ class SetupDropdown(ui.Select):
         super().__init__(
             placeholder="Select settings to configure...",
             min_values=1,
-            max_values=min(5, len(SETTINGS_PAGES[view.page])),
+            max_values=min(5, len(options)),
             options=options
         )
 
     async def callback(self, interaction: discord.Interaction):
-        selected_keys = self.values
+        selected_keys = self.values[:5]
         modal = SettingModal(
             selected_keys,
             self.setup_view.settings,
@@ -131,22 +131,34 @@ class SetupView(ui.View):
         async def first_cb(interaction: discord.Interaction):
             self.page = 0
             self._rebuild()
-            await interaction.response.edit_message(embed=build_embed(self.division_name, self.settings, self.page), view=self)
+            await interaction.response.edit_message(
+                embed=build_embed(self.division_name, self.settings, self.page),
+                view=self
+            )
 
         async def prev_cb(interaction: discord.Interaction):
             self.page = max(0, self.page - 1)
             self._rebuild()
-            await interaction.response.edit_message(embed=build_embed(self.division_name, self.settings, self.page), view=self)
+            await interaction.response.edit_message(
+                embed=build_embed(self.division_name, self.settings, self.page),
+                view=self
+            )
 
         async def next_cb(interaction: discord.Interaction):
             self.page = min(len(SETTINGS_PAGES) - 1, self.page + 1)
             self._rebuild()
-            await interaction.response.edit_message(embed=build_embed(self.division_name, self.settings, self.page), view=self)
+            await interaction.response.edit_message(
+                embed=build_embed(self.division_name, self.settings, self.page),
+                view=self
+            )
 
         async def last_cb(interaction: discord.Interaction):
             self.page = len(SETTINGS_PAGES) - 1
             self._rebuild()
-            await interaction.response.edit_message(embed=build_embed(self.division_name, self.settings, self.page), view=self)
+            await interaction.response.edit_message(
+                embed=build_embed(self.division_name, self.settings, self.page),
+                view=self
+            )
 
         async def cancel_cb(interaction: discord.Interaction):
             await self.disable_all()
@@ -181,7 +193,10 @@ class SetupView(ui.View):
 async def division_setup(interaction: discord.Interaction, division: str):
     if not await check_division_admin(interaction):
         await interaction.response.send_message(
-            embed=discord.Embed(description="You don't have permission to do this.", color=discord.Color.red())
+            embed=discord.Embed(
+                description="You don't have permission to do this.",
+                color=discord.Color.red()
+            )
         )
         return
 
@@ -191,7 +206,10 @@ async def division_setup(interaction: discord.Interaction, division: str):
     div = await get_division_by_code(pool, guild_id, division)
     if not div:
         await interaction.response.send_message(
-            embed=discord.Embed(description=f"No division found with code `{division.upper()}`.", color=discord.Color.red())
+            embed=discord.Embed(
+                description=f"No division found with code `{division.upper()}`.",
+                color=discord.Color.red()
+            )
         )
         return
 
