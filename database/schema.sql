@@ -126,3 +126,43 @@ CREATE TABLE IF NOT EXISTS division_season_archive (
     groups_snapshot JSONB
 );
 
+CREATE TABLE IF NOT EXISTS applications (
+    id SERIAL PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    division_code TEXT NOT NULL,
+    team_code TEXT NOT NULL,
+    team_name TEXT NOT NULL,
+    channel_id TEXT NOT NULL,
+    rep_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(guild_id, division_code, team_code)
+);
+
+CREATE TABLE IF NOT EXISTS teams (
+    id SERIAL PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    division_code TEXT NOT NULL,
+    team_code TEXT NOT NULL,
+    team_name TEXT NOT NULL,
+    rep_id TEXT,
+    rep2_id TEXT,
+    main_clan TEXT,
+    secondary_clan TEXT,
+    timezone TEXT,
+    language TEXT,
+    logo_url TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(guild_id, division_code, team_code)
+);
+
+CREATE TABLE IF NOT EXISTS rosters (
+    id SERIAL PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    division_code TEXT NOT NULL,
+    team_code TEXT NOT NULL,
+    player_tag TEXT NOT NULL,
+    claimed_by TEXT,
+    UNIQUE(guild_id, division_code, player_tag)
+);
