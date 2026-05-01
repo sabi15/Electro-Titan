@@ -10,13 +10,14 @@ from cogs.division.utils import (
 
 def build_embed(division_name: str, settings: dict, page: int) -> discord.Embed:
     embed = discord.Embed(
-        title=f"Division Setup — {division_name}",
+        title=f"Setup — {division_name}",
         color=discord.Color.blurple()
     )
-    lines = [f"`{key}`" for key in SETTINGS_PAGES[page]]
-    embed.description = "\n".join(lines)
+    lines = [key for key in SETTINGS_PAGES[page]]
+    embed.description = "```\n" + "\n".join(lines) + "\n```"
     embed.set_footer(text=f"Page {page + 1} of {len(SETTINGS_PAGES)} — Select a setting to configure it.")
     return embed
+
 
 
 class SettingModal(ui.Modal):
