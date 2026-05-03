@@ -34,7 +34,12 @@ class Team(ext_commands.Cog):
             app_commands.describe(
                 clan_tag="CoC clan tag",
                 clan_type="Main or secondary clan"
-            )(team_setclan)
+            )(
+            app_commands.choices(clan_type=[
+                app_commands.Choice(name="Main", value="main"),
+                app_commands.Choice(name="Secondary", value="secondary"),
+            ])(team_setclan)
+            )
         )
         self.group.command(name="setlanguage", description="Set your team's language")(
             app_commands.describe(
