@@ -4,6 +4,7 @@ from utils.emojis import get_th_emoji, E_WRONG
 from utils.helpers import normalize_tag
 from cogs.acc.utils import maybe_send_invite
 from datetime import timezone
+import coc
 
 
 async def history(interaction: discord.Interaction, tag: str = None, user: discord.Member = None):
@@ -16,6 +17,22 @@ async def history(interaction: discord.Interaction, tag: str = None, user: disco
 
    if tag:
        tag = normalize_tag(tag)
+
+
+       try:
+           await interaction.client.coc_client.get_player(tag)
+       except coc.NotFound:
+           await interaction.followup.send(embed=discord.Embed(
+               description=f"{E_WRONG} Player tag `{tag}` not found. Check the tag and try again.",
+               color=discord.Color.red()
+           ))
+           return
+       except Exception as e:
+           await interaction.followup.send(embed=discord.Embed(
+               description=f"{E_WRONG} CoC API error: {e}",
+               color=discord.Color.red()
+           ))
+           return
 
        rows = await pool.fetch(
            """
