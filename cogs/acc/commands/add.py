@@ -3,6 +3,7 @@ from discord import app_commands
 from database.db import get_pool
 from utils.emojis import get_th_emoji
 from cogs.acc.utils import maybe_send_invite
+from utils.emojis import E_CORRECT, E_WRONG, E_WARN
 import coc
 
 
@@ -25,12 +26,12 @@ async def add(interaction: discord.Interaction, tag: str, api: str):
     if existing:
         if existing["discord_id"] == interaction.user.id:
             embed = discord.Embed(
-                description="❌ You have already claimed this account.",
+                description=f"{E_WRONG} You are already linked with this account.",
                 color=discord.Color.red()
             )
         else:
             embed = discord.Embed(
-                description="❌ This account is already claimed by another user.",
+                description=f"{E_WRONG} This account is already linked with another user.",
                 color=discord.Color.red()
             )
         await interaction.followup.send(embed=embed)
@@ -41,21 +42,21 @@ async def add(interaction: discord.Interaction, tag: str, api: str):
         result = await coc_client.verify_player_token(tag, api)
         if not result:
             embed = discord.Embed(
-                description="❌ Invalid API token. Please check your in-game settings and try again.",
+                description=f"{E_WRONG} Invalid API token. Please check your ingame settings and try again.",
                 color=discord.Color.red()
             )
             await interaction.followup.send(embed=embed)
             return
     except coc.NotFound:
         embed = discord.Embed(
-            description=f"❌ Player tag `{tag}` not found.",
+            description=f"{E_WRONG} Player tag `{tag}` not found.",
             color=discord.Color.red()
         )
         await interaction.followup.send(embed=embed)
         return
     except coc.ClashOfClansException as e:
         embed = discord.Embed(
-            description=f"❌ CoC API error: {e}",
+            description=f"{E_WRONG} CoC API error: {e}",
             color=discord.Color.red()
         )
         await interaction.followup.send(embed=embed)
@@ -65,7 +66,7 @@ async def add(interaction: discord.Interaction, tag: str, api: str):
         player = await coc_client.get_player(tag)
     except coc.ClashOfClansException as e:
         embed = discord.Embed(
-            description=f"❌ Could not fetch player data: {e}",
+            description=f"{E_WRONG} Could not fetch player data: {e}",
             color=discord.Color.red()
         )
         await interaction.followup.send(embed=embed)
