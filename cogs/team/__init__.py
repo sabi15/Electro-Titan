@@ -32,8 +32,8 @@ class Team(ext_commands.Cog):
         )
         self.group.command(name="setclan", description="Set your team's main or secondary clan")(
             app_commands.describe(
-                clan_tag="CoC clan tag",
-                clan_type="Main or secondary clan"
+                clan_type="Main or secondary clan",
+                clan_tag="CoC clan tag"
             )(
             app_commands.choices(clan_type=[
                 app_commands.Choice(name="Main", value="main"),
