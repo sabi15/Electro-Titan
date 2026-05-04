@@ -76,5 +76,5 @@ async def team_setclan(interaction: discord.Interaction, clan_tag: str, clan_typ
    clan_link = f"https://link.clashofclans.com/en?action=OpenClanProfile&tag={tag.replace('#', '')}"
    await interaction.followup.send(embed=discord.Embed(
        description=f"{E_CORRECT} **{clan_type.capitalize()} Clan** of **{app['team_name']}** is set to Lv.**{clan.level}** **{clan.name}**[link]({clan_link})**.",
-       color=0x2ecc71
+       color=0x6BBF73
    ))
